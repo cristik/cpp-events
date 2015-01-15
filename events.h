@@ -9,6 +9,7 @@ private:
     class event_handler{
     public:
         event_handler(int tag) : tag(tag) {}
+        virtual ~event_handler() {}
         bool isEqual(event_handler *other) {
             if (!other) return false;
             if (other->tag != this->tag) return false;
@@ -130,7 +131,7 @@ public:
     
     void operator -=(void (*f)(Sender*, arguments...)) {
         auto handler = static_event_handler(f);
-        handler_list.add(&f);
+        handler_list.remove(&handler);
     }
     
     
