@@ -16,7 +16,6 @@ private:
             return this->checkEqual(other);
         }
         virtual void emit(Sender *s, arguments... args) = 0;
-        virtual event_handler *clone() = 0;
     protected:
         int tag;
         virtual bool checkEqual(event_handler *other) = 0;
@@ -57,9 +56,6 @@ private:
         virtual void emit(Sender *s, arguments... args) {
             (o->*f)(s, args...);
         }
-        virtual event_handler *clone(){
-            return new instance_event_handler<O, F>(o, f);
-        }
     protected:
         virtual bool checkEqual(event_handler *other) {
             auto handler = dynamic_cast<instance_event_handler*>(other);
@@ -76,9 +72,6 @@ private:
         virtual void emit(Sender *s, arguments... args){
             f(s, args...);
         }
-        virtual event_handler *clone(){
-            return new static_event_handler(f);
-        }
     protected:
         virtual bool checkEqual(event_handler *other) {
             auto handler = dynamic_cast<static_event_handler*>(other);
@@ -93,9 +86,6 @@ private:
         function_event_handler(std::function<void (Sender*, arguments...)> f) : event_handler(3), f(f){}
         virtual void emit(Sender *s, arguments... args){
             f(s, args...);
-        }
-        virtual event_handler *clone(){
-            return new function_event_handler(f);
         }
     protected:
         virtual bool checkEqual(event_handler *other) {
@@ -126,7 +116,7 @@ public:
     }
     
     void operator +=(void (*f)(Sender*, arguments...)) {
-        handler_list.add(static_event_handler(f).clone());
+        handler_list.add(new static_event_handler(f));
     }
     
     void operator -=(void (*f)(Sender*, arguments...)) {
@@ -136,7 +126,7 @@ public:
     
     
     void operator +=(std::function<void (Sender*, arguments...)> f) {
-        handler_list.add(function_event_handler(f).clone());
+        handler_list.add(new function_event_handler(f));
     }
     
     template<class F>
