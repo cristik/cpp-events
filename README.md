@@ -45,8 +45,8 @@ public:
             // do whatever is needed
         };
         
-        // non-capturing lamdba's need a workardound otherwise the compiler 
-        // will complain about += being ambigous - calling the unary "+" operator will do the trick
+        // non-capturing lamdba's need a workardound otherwise the compiler will
+        // complain about += being ambigous, calling the unary "+" operator will do the trick
         subject.onNewAgeReceived += +[](Subject *sender, int age) {
             // do whatever is needed
         };
