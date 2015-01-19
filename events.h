@@ -17,8 +17,9 @@ private:
         }
         virtual void emit(Sender *s, arguments... args) = 0;
     protected:
-        int tag;
         virtual bool checkEqual(event_handler *other) = 0;
+    private:
+        int tag;
     };
     
     class event_handler_list {
@@ -50,7 +51,7 @@ private:
     };
     
     template<class O, class F>
-    class instance_event_handler : public event_handler{
+    class instance_event_handler : public event_handler {
     public:
         instance_event_handler(O o, F f) : event_handler(1), o(o), f(f){}
         virtual void emit(Sender *s, arguments... args) {
@@ -68,7 +69,8 @@ private:
     
     class static_event_handler : public event_handler{
     public:
-        static_event_handler(void (*f)(Sender*, arguments...)) : event_handler(2), f(f){}
+        typedef void (*F)(Sender*, arguments...);
+        static_event_handler(F f) : event_handler(2), f(f){}
         virtual void emit(Sender *s, arguments... args){
             f(s, args...);
         }
@@ -78,12 +80,13 @@ private:
             return this->f == handler->f;
         }
     private:
-        void (*f)(Sender*, arguments...);
+        F f;
     };
     
     class function_event_handler : public event_handler{
     public:
-        function_event_handler(std::function<void (Sender*, arguments...)> f) : event_handler(3), f(f){}
+        typedef std::function<void (Sender*, arguments...)> F;
+        function_event_handler(F f) : event_handler(3), f(f){}
         virtual void emit(Sender *s, arguments... args){
             f(s, args...);
         }
@@ -92,17 +95,19 @@ private:
             return false;
         }
     private:
-        std::function<void (Sender*, arguments...)> f;
+        F f;
     };
     
     Sender *s;
     event_handler_list handler_list;
     friend Sender;
+
 protected:
     event(Sender *s) : s(s) {}
-    void operator()(arguments... args){
+    void operator()(arguments... args) {
         handler_list.emit(s, args...);
     }
+
 public:
     template<class O, class F>
     void operator +=(std::pair<O, F> p) {
