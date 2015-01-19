@@ -21,6 +21,8 @@ public:
         int oldAge = age;
         age = value;
         // sender, aka this will be automatically passed to the subscribers 
+        // the () operator is protected, however Subject is friend to event
+        // trying to raise the event from outside the class is not possible
         onDataChanged();
         onNewAgeReceived(age);
         onAgeChanged(oldAge, newAge);
