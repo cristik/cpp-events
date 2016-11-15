@@ -15,7 +15,7 @@ private:
             if (other->tag != this->tag) return false;
             return this->checkEqual(other);
         }
-        virtual void emit(Sender *s, arguments... args) = 0;
+        virtual void notify(Sender *s, arguments... args) = 0;
     protected:
         virtual bool checkEqual(event_handler *other) = 0;
     private:
@@ -41,9 +41,9 @@ private:
                 delete handler;
             }
         }
-        void emit(Sender *s, arguments... args) {
+        void notify(Sender *s, arguments... args) {
             for(auto handler : handlers) {
-                handler->emit(s, args...);
+                handler->notify(s, args...);
             }
         }
     private:
@@ -54,7 +54,7 @@ private:
     class instance_event_handler : public event_handler {
     public:
         instance_event_handler(O o, F f) : event_handler(1), o(o), f(f){}
-        virtual void emit(Sender *s, arguments... args) {
+        virtual void notify(Sender *s, arguments... args) {
             (o->*f)(s, args...);
         }
     protected:
@@ -71,7 +71,7 @@ private:
     public:
         typedef void (*F)(Sender*, arguments...);
         static_event_handler(F f) : event_handler(2), f(f){}
-        virtual void emit(Sender *s, arguments... args){
+        virtual void notify(Sender *s, arguments... args){
             f(s, args...);
         }
     protected:
@@ -87,7 +87,7 @@ private:
     public:
         typedef std::function<void (Sender*, arguments...)> F;
         function_event_handler(F f) : event_handler(3), f(f){}
-        virtual void emit(Sender *s, arguments... args){
+        virtual void notify(Sender *s, arguments... args){
             f(s, args...);
         }
     protected:
@@ -105,7 +105,7 @@ private:
 protected:
     event(Sender *s) : s(s) {}
     void operator()(arguments... args) {
-        handler_list.emit(s, args...);
+        handler_list.notify(s, args...);
     }
 
 public:

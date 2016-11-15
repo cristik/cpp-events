@@ -17,10 +17,10 @@ public:
     // need to pass the sender param when constructing the events
     Subject() : onDataChanged(this), onNewAgeReceived(this), onAgeChanged(this) {}
     
-    void updateAge(int value) {
+    void updateAge(int newAge) {
         int oldAge = age;
-        age = value;
-        // sender, aka this will be automatically passed to the subscribers 
+        age = newAge;
+        // sender, aka this will be automatically passed to the subscribers
         // the () operator is protected, however Subject is friend to event
         // trying to raise the event from outside the class is not possible
         onDataChanged();
@@ -29,44 +29,43 @@ public:
     }
 private:
     int age;
-}
+};
 
 class Observer {
-private
+private:
     Subject *subject;
 public:
     Observer(Subject *aSubject) : subject(aSubject) {
         // instance methods need to use the event_handler() helper function
-        subject.onDataChanged += event_handler(this, &Observer::subjectAgeChanged);
+        subject->onDataChanged += event_handler(this, &Observer::subjectChanged);
         
         // static class methods, or global ones can also be added
-        subject.onAgeChanged += &Observer::subjectChanged;
+        subject->onAgeChanged += &Observer::subjectAgeChanged;
         
         // can also add lambdas (however those can't be removed)
-        subject.onNewAgeReceived += [=](Subject *sender, int age) {
-            // do whatever is needed
+        subject->onNewAgeReceived += [=](Subject *sender, int age) {
+            printf("Subject received new age: %d\n", age);
         };
         
         // non-capturing lamdba's need a workardound otherwise the compiler will
         // complain about += being ambigous, calling the unary "+" operator will do the trick
-        subject.onNewAgeReceived += +[](Subject *sender, int age) {
+        subject->onNewAgeReceived += +[](Subject *sender, int age) {
             // do whatever is needed
         };
     }
     
     virtual ~Observer() {
         // remove the attached event handlers
-        subject.onDataChanged -= event_handler(this, &Observer::subjectAgeChanged);
-        subject.onAgeChanged -= &Observer::subjectChanged;
+        subject->onDataChanged -= event_handler(this, &Observer::subjectChanged);
+        subject->onAgeChanged -= &Observer::subjectAgeChanged;
     }
     
-    static void subjectChanged(Subject *sender) {
-        // handle the subject data change
+    void subjectChanged(Subject *sender) {
+        printf("Subject changed\n");
     }
     
-    void subjectAgeChanged(Subject *sender, int oldAge, int newAge) {
-       // handle the age difference
+    static void subjectAgeChanged(Subject *sender, int oldAge, int newAge) {
+        printf("Subject age changed from %d to %d\n", oldAge, newAge);
     }
-    
-}
+};
 ```
