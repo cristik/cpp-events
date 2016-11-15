@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
 
   s.name            = 'cpp-events'
-  s.version         = '1.0.0'
+  s.version         = '1.0.1'
   s.summary         = 'Events support for C++, using variadic templates'
   s.homepage        = 'https://github.com/cristik/cpp-events'
   s.source          = { :git => 'https://github.com/cristik/cpp-events.git', :tag => s.version.to_s }
